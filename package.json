@@ -2,6 +2,7 @@
   "name": "httphost",
   "version": "1.0.0",
   "description": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "nodemon index.js"
@@ -17,6 +18,9 @@
   },
   "homepage": "https://github.com/EsaiasTilly/HttpHost#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "multer": "^1.4.3"
   }
 }

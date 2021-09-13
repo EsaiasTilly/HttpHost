@@ -5,8 +5,39 @@
         <meta http-equiv='X-UA-Compatible' content='IE=edge'>
         <title>HttpHost</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <link rel="stylesheet" href="./assets/css/style.css" />
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <main>
+            <div class="top">
+                <a id="topSessionLink" target="_blank">Loading session...</a>
+            </div>
+
+            <div class="row">
+                <table id="filelist">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelistBody"></tbody>
+                </table>
+            </div>
+
+            <div class="row">
+                <input id="newDirPath" type="text" placeholder="eg. /assets/birds/" />
+                <button onclick="requestNewDir(document.getElementById('newDirPath').value)">Create Directory</button>
+            </div>
+        </main>
+
+        <form action="/f/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="content" multiple />
+            <input type="submit" value="Upload" />
+        </form>
+        <script type="text/javascript" src="./assets/js/script.js"></script>
+        <script type="text/javascript" src="./assets/js/tools.js"></script>
     </body>
 </html>
