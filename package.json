@@ -1,0 +1,22 @@
+{
+  "name": "httphost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EsaiasTilly/HttpHost.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EsaiasTilly/HttpHost/issues"
+  },
+  "homepage": "https://github.com/EsaiasTilly/HttpHost#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
