@@ -11,13 +11,14 @@ const handleFileUpload = (req, res) => {
     // Check Provided Path
     if(req.body.path == undefined) { res.json(false); return false; }
     if(!fs.existsSync(path.join(__dirname, '/user_content/', sessionData.id, req.body.path))) { res.json(false); return false; }
+    const relPath = req.body.path.replaceAll('.', '');
 
     try
     {
         // Move Files
         req.files.forEach(file => {
             const sourcePath = path.join(__dirname, '/tmp', file.filename);
-            const destPath = path.join(__dirname, '/user_content/', sessionData.id, req.body.path, file.originalname);
+            const destPath = path.join(__dirname, '/user_content/', sessionData.id, relPath, file.originalname);
             const source = fs.createReadStream(sourcePath);
             const dest = fs.createWriteStream(destPath);
             source.pipe(dest);
@@ -106,5 +107,7 @@ const getFileInfo = (filePath, basePath) => {
         size: fileStatus.size,
         path: filePath.substr(basePath.length).replaceAll('\\', '/')
     }
+    if(fileInfo.isDirectory && fileInfo.path.lastIndexOf('/') < fileInfo.path.length - 1)
+    { fileInfo.path += '/'; }
     return fileInfo;
 };
