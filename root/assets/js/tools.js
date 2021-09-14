@@ -56,5 +56,15 @@ const Tools = {
             bytes = Math.round(bytes / 1024 * 10) / 10;
         }
         return bytes + ' ' + prefix;
+    },
+    /**
+     * Parses a string for use in HTML
+     * @param {String} str Unsafe string
+     * @returns Safe HTML string
+     */
+    htmlParse: str => {
+        const dummy = document.createElement('div');
+        dummy.innerText = str;
+        return dummy.innerHTML;
     }
 };

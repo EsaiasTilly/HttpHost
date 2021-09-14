@@ -28,6 +28,7 @@ app.get('/s/get', sessions.getSession);
 app.get('/f/all', files.handleFileListRequest);
 app.post('/f/upload', upload.array('content'), files.handleFileUpload);
 app.post('/f/newDir', files.handleNewDirectoryRequest);
+app.post('/f/del', files.handleFileDeletionRequest);
 
 // Start Listening
 app.listen(port, () => {

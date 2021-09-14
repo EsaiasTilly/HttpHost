@@ -42,6 +42,23 @@ const loadUI = () => {
  */
 const loadFilelist = () => {
     /**
+     * Generates action buttons for a specific file
+     * @param {Object} file File data object
+     * @returns {String} Action buttons html
+     */
+    const fileActionButtons = file => {
+        // Return No Actions On Root Directory
+        if(file.path == '/') '';
+
+        // Create Actions
+        let actions = '';
+        actions += '<button onClick="deleteFile(' + Tools.htmlParse(JSON.stringify(file.path).replaceAll('"', '\'')) + ');">Delete</button>';
+
+        // Return Action Html
+        return actions;
+    };
+
+    /**
      * Handles the request response for filelist
      * @param {String} res Response data from request
      */
@@ -55,11 +72,12 @@ const loadFilelist = () => {
 
             files.forEach(file => {
                 const fileRow = document.createElement('tr');
-                fileRow.innerHTML = '<td></td><td><a></a></td><td></td><td></td>'
+                fileRow.innerHTML = '<td></td><td><a></a></td><td></td><td></td>';
                 fileRow.childNodes[0].innerHTML = '<img src="/assets/icons/' + (file.isDirectory ? 'dir' : 'file') + '.svg" />';
-                fileRow.childNodes[1].childNodes[0].href = baseUrl + encodeURIComponent(file.path);
-                fileRow.childNodes[1].childNodes[0].innerText = file.path;
-                fileRow.childNodes[2].innerText = file.isFile ? Tools.parseBytes(file.size) : '';
+                fileRow.childNodes[1].childNodes[0].href = Tools.htmlParse(baseUrl + encodeURIComponent(file.path));
+                fileRow.childNodes[1].childNodes[0].innerText = Tools.htmlParse(file.path);
+                fileRow.childNodes[2].innerText = file.isFile ? Tools.htmlParse(Tools.parseBytes(file.size)) : '';
+                fileRow.childNodes[3].innerHTML = fileActionButtons(file);
                 filelistBody.appendChild(fileRow);
             });
         } else {
@@ -73,5 +91,11 @@ const loadFilelist = () => {
 const requestNewDir = path => {
     if(path != '' && path != '/') {
         Tools.httpPost('/f/newDir', 'path=' + encodeURIComponent(path), loadFilelist);
+    }
+};
+
+const deleteFile = path => {
+    if(path != '' && path != '/') {
+        Tools.httpPost('/f/del', 'path=' + encodeURIComponent(path), loadFilelist);
     }
 };

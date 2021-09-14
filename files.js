@@ -16,15 +16,16 @@ const handleFileUpload = (req, res) => {
     // Check Provided Path
     if(req.body.path == undefined) { res.json(false); return; }
     if(!fs.existsSync(path.join(__dirname, '/user_content/', sessionData.id, req.body.path))) { res.json(false); return; }
-    const relPath = req.body.path.replaceAll('.', '');
 
     try
     {
         // Move Files
         req.files.forEach(file => {
             const sourcePath = path.join(__dirname, '/tmp', file.filename);
-            const fileName = file.originalname.replaceAll('/', '').replaceAll('\\', '');
-            const destPath = path.join(__dirname, '/user_content/', sessionData.id, relPath, fileName);
+            const relPath = path.join(req.body.path, file.originalname);
+            const currentDirectory = path.join(__dirname, '/user_content/', sessionData.id);
+            const destPath = path.join(currentDirectory, relPath);
+            if(!pathIsSub(destPath, currentDirectory)) { res.json(false); return; }
             const source = fs.createReadStream(sourcePath);
             const dest = fs.createWriteStream(destPath);
             source.pipe(dest);
@@ -49,13 +50,12 @@ exports.handleFileUpload = handleFileUpload;
  * Handles requests to create new directories
  * @param {*} req 
  * @param {*} res 
- * @returns 
  */
 const handleNewDirectoryRequest = (req, res) => {
     // Check For Session Data
-    if(req.cookies.sessionToken == undefined) { res.json(false); return false; }
+    if(req.cookies.sessionToken == undefined) { res.json(false); return; }
     const sessionData = sessions.getSessionInternal(req.cookies.sessionToken);
-    if(!sessionData) { res.json(false); return false; }
+    if(!sessionData) { res.json(false); return; }
 
     try {
         // Check If A Path Has Been Provided
@@ -63,7 +63,8 @@ const handleNewDirectoryRequest = (req, res) => {
         else {
             // Get Directory Listing
             const currentDirectory = path.join(__dirname, '/user_content/', sessionData.id);
-            const newDirPath = path.join(currentDirectory, req.body.path.replaceAll('.', ''));
+            const newDirPath = path.join(currentDirectory, req.body.path);
+            if(!pathIsSub(newDirPath, currentDirectory)) { res.json(false); return; }
             fs.mkdirSync(newDirPath, { recursive: true });
             res.json(true);
         }
@@ -73,6 +74,34 @@ const handleNewDirectoryRequest = (req, res) => {
 };
 
 exports.handleNewDirectoryRequest = handleNewDirectoryRequest;
+
+/**
+ * Handles a file deletion request
+ * @param {*} req 
+ * @param {*} res 
+ */
+const handleFileDeletionRequest = (req, res) => {
+    // Check For Session Data
+    if(req.cookies.sessionToken == undefined) { res.json(false); return; }
+    const sessionData = sessions.getSessionInternal(req.cookies.sessionToken);
+    if(!sessionData) { res.json(false); return; }
+
+    try {
+        // Check If Path Is Safe
+        const currentDirectory = path.join(__dirname, '/user_content/', sessionData.id);
+        const deletionPath = path.join(currentDirectory, req.body.path);
+        if(!pathIsSub(deletionPath, currentDirectory)) { res.json(false); return; }
+
+        // Delete File
+        if(fs.statSync(deletionPath).isFile()) fs.unlinkSync(deletionPath);
+        else fs.rmdirSync(deletionPath, { recursive: true, force: true });
+        res.json(true);
+    } catch (error) {
+        res.json(false);
+    }
+};
+
+exports.handleFileDeletionRequest = handleFileDeletionRequest;
 
 /**
  * Handle request for file structure
@@ -128,4 +157,9 @@ const getFileInfo = (filePath, basePath) => {
     if(fileInfo.isDirectory && fileInfo.path.lastIndexOf('/') < fileInfo.path.length - 1)
     { fileInfo.path += '/'; }
     return fileInfo;
+};
+
+const pathIsSub = (filePath, basePath) => {
+    const relative = path.relative(basePath, filePath);
+    return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
 };
