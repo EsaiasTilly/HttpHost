@@ -74,7 +74,7 @@ const loadFilelist = () => {
                 const fileRow = document.createElement('tr');
                 fileRow.innerHTML = '<td></td><td><a></a></td><td></td><td></td>';
                 fileRow.childNodes[0].innerHTML = '<img src="/assets/icons/' + (file.isDirectory ? 'dir' : 'file') + '.svg" />';
-                fileRow.childNodes[1].childNodes[0].href = Tools.htmlParse(baseUrl + encodeURIComponent(file.path));
+                fileRow.childNodes[1].childNodes[0].href = Tools.htmlParse(baseUrl + file.path);
                 fileRow.childNodes[1].childNodes[0].innerText = Tools.htmlParse(file.path);
                 fileRow.childNodes[2].innerText = file.isFile ? Tools.htmlParse(Tools.parseBytes(file.size)) : '';
                 fileRow.childNodes[3].innerHTML = fileActionButtons(file);
