@@ -2,15 +2,20 @@ const path = require('path');
 const fs = require('fs');
 const sessions = require('./sessions');
 
+/**
+ * Handles uploading of user content
+ * @param {*} req
+ * @param {*} res
+ */
 const handleFileUpload = (req, res) => {
     // Check For Session Data
-    if(req.cookies.sessionToken == undefined) { res.json(false); return false; }
+    if(req.cookies.sessionToken == undefined) { res.json(false); return; }
     const sessionData = sessions.getSessionInternal(req.cookies.sessionToken);
-    if(!sessionData) { res.json(false); return false; }
+    if(!sessionData) { res.json(false); return; }
 
     // Check Provided Path
-    if(req.body.path == undefined) { res.json(false); return false; }
-    if(!fs.existsSync(path.join(__dirname, '/user_content/', sessionData.id, req.body.path))) { res.json(false); return false; }
+    if(req.body.path == undefined) { res.json(false); return; }
+    if(!fs.existsSync(path.join(__dirname, '/user_content/', sessionData.id, req.body.path))) { res.json(false); return; }
     const relPath = req.body.path.replaceAll('.', '');
 
     try
@@ -18,7 +23,8 @@ const handleFileUpload = (req, res) => {
         // Move Files
         req.files.forEach(file => {
             const sourcePath = path.join(__dirname, '/tmp', file.filename);
-            const destPath = path.join(__dirname, '/user_content/', sessionData.id, relPath, file.originalname);
+            const fileName = file.originalname.replaceAll('/', '').replaceAll('\\', '');
+            const destPath = path.join(__dirname, '/user_content/', sessionData.id, relPath, fileName);
             const source = fs.createReadStream(sourcePath);
             const dest = fs.createWriteStream(destPath);
             source.pipe(dest);
@@ -39,6 +45,12 @@ const handleFileUpload = (req, res) => {
 
 exports.handleFileUpload = handleFileUpload;
 
+/**
+ * Handles requests to create new directories
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 const handleNewDirectoryRequest = (req, res) => {
     // Check For Session Data
     if(req.cookies.sessionToken == undefined) { res.json(false); return false; }
@@ -51,7 +63,7 @@ const handleNewDirectoryRequest = (req, res) => {
         else {
             // Get Directory Listing
             const currentDirectory = path.join(__dirname, '/user_content/', sessionData.id);
-            const newDirPath = path.join(currentDirectory, req.body.path);
+            const newDirPath = path.join(currentDirectory, req.body.path.replaceAll('.', ''));
             fs.mkdirSync(newDirPath, { recursive: true });
             res.json(true);
         }
@@ -62,6 +74,12 @@ const handleNewDirectoryRequest = (req, res) => {
 
 exports.handleNewDirectoryRequest = handleNewDirectoryRequest;
 
+/**
+ * Handle request for file structure
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 const handleFileListRequest = (req, res) => {
     // Check For Session Data
     if(req.cookies.sessionToken == undefined) { res.json(false); return false; }
