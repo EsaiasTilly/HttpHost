@@ -8,12 +8,16 @@ const handleFileUpload = (req, res) => {
     const sessionData = sessions.getSessionInternal(req.cookies.sessionToken);
     if(!sessionData) { res.json(false); return false; }
 
+    // Check Provided Path
+    if(req.body.path == undefined) { res.json(false); return false; }
+    if(!fs.existsSync(path.join(__dirname, '/user_content/', sessionData.id, req.body.path))) { res.json(false); return false; }
+
     try
     {
         // Move Files
         req.files.forEach(file => {
             const sourcePath = path.join(__dirname, '/tmp', file.filename);
-            const destPath = path.join(__dirname, '/user_content/', sessionData.id, file.originalname);
+            const destPath = path.join(__dirname, '/user_content/', sessionData.id, req.body.path, file.originalname);
             const source = fs.createReadStream(sourcePath);
             const dest = fs.createWriteStream(destPath);
             source.pipe(dest);
@@ -77,6 +81,7 @@ exports.handleFileListRequest = handleFileListRequest;
  */
 const getDirListing = searchPath => {
     const files = [];
+    files.push(getFileInfo(searchPath + '/', searchPath));
     const walk = dir => {
         fs.readdirSync(dir).forEach(file => {
             const absolute = path.join(dir, file);
